@@ -26,16 +26,16 @@ import javax.xml.parsers.ParserConfigurationException;
  */
 public class AndroidStringFile {
     public final String fileName;//including the path
-    List<AndroidString> androidString;
+    List<AndroidResource> androidString;
 
     public AndroidStringFile(String fileName) {
         this.fileName = fileName;
         androidString = new ArrayList<>();
     }
 
-    public int indexOf(AndroidString asIdx){
+    public int indexOf(AndroidResource asIdx){
         for(int i = 0; i < androidString.size(); ++i){
-            AndroidString as = androidString.get(i);
+            AndroidResource as = androidString.get(i);
             if (as.equals(asIdx)){
                 return i;
             }
@@ -48,14 +48,14 @@ public class AndroidStringFile {
      */
     public void merge(AndroidStringFile asf) {
         for (int i = 0; i < androidString.size(); ++i) {
-            AndroidString as = androidString.get(i);
-            for (AndroidString asother : asf.androidString) {
+            AndroidResource as = androidString.get(i);
+            for (AndroidResource asother : asf.androidString) {
                 if (as.equals(asother)) {
                     androidString.set(i, asother);
                 }
             }
         }
-        for (AndroidString asother : asf.androidString) {
+        for (AndroidResource asother : asf.androidString) {
             if (!androidString.contains(asother)){
                 androidString.add(asother);
             }
@@ -75,7 +75,7 @@ public class AndroidStringFile {
         try {
             FileOutputStream ostream = new FileOutputStream(destF);
             ostream.write("<resources>\n".getBytes());
-            for (AndroidString as : androidString) {
+            for (AndroidResource as : androidString) {
                 ostream.write(as.toString().getBytes());
             }
             ostream.write("</resources>".getBytes());
@@ -85,10 +85,19 @@ public class AndroidStringFile {
         }
     }
 
-    public void addAndroidString(AndroidString as) {
+    public void addAndroidString(AndroidResource as) {
         androidString.add(as);
     }
 
+
+    /**
+     * 从res目录下面的xml文件解析AndroidStringFile出来
+     * @param fn
+     * @return
+     * @throws IOException
+     * @throws ParserConfigurationException
+     * @throws SAXException
+     */
     public static List<AndroidStringFile> parseFromFolder(File fn) throws IOException, ParserConfigurationException, SAXException {
         List<AndroidStringFile> ret = new ArrayList<>();
         assert fn.isDirectory();
@@ -96,6 +105,7 @@ public class AndroidStringFile {
         for (File f : files) {
             if (f.isDirectory()) {
                 ret.addAll(parseFromFolder(f));
+            //} else if (f.getName().endsWith(".xml")) {
             } else if (f.getName().equals("strings.xml")) {
                 AndroidStringFile asf = parseFromFile(f);
                 if (asf != null) {
@@ -107,7 +117,7 @@ public class AndroidStringFile {
         return ret;
     }
 
-    public static AndroidStringFile parseFromFile(File fn) throws IOException, ParserConfigurationException, SAXException {
+    private static AndroidStringFile parseFromFile(File fn) throws IOException, ParserConfigurationException, SAXException {
         String currentPath = System.getProperty("user.dir");
         String fp = fn.getAbsolutePath();
         AndroidStringFile ret = new AndroidStringFile(fp.substring(currentPath.length()));
@@ -137,16 +147,17 @@ public class AndroidStringFile {
             }
             arrayMap.put(id, array);
         }
+
         nodes = root.getElementsByTagName("string");
         for (int i = 0; i < nodes.getLength(); ++i) {
             Node node = nodes.item(i);
             String id = node.getAttributes().getNamedItem("name").getTextContent();
             String str = node.getTextContent();
-            ret.addAndroidString(new AndroidString.AndroidCommonString(id, str));
+            ret.addAndroidString(new AndroidResource.AndroidCommonString(id, str));
         }
         for (String key : arrayMap.keySet()) {
             List<String> strings = arrayMap.get(key);
-            AndroidString as = new AndroidString.AndroidArrayString(key, strings);
+            AndroidResource as = new AndroidResource.AndroidArrayString(key, strings);
             ret.addAndroidString(as);
         }
         if (ret.androidString.size() > 0)
@@ -155,6 +166,12 @@ public class AndroidStringFile {
             return null;
     }
 
+    /**
+     * 从csv文件解析成为AndroidStringFile
+     * @param fn
+     * @return
+     * @throws IOException
+     */
     public static List<AndroidStringFile> parseFromString(File fn) throws IOException {
         List<AndroidStringFile> ret = new ArrayList<>();
         List<String[]> data = new ArrayList<>();
@@ -200,12 +217,12 @@ public class AndroidStringFile {
                         }
                         k++;
                     }
-                    ret.get(j - 1).addAndroidString(new AndroidString.AndroidArrayString(strId, array));
+                    ret.get(j - 1).addAndroidString(new AndroidResource.AndroidArrayString(strId, array));
                 }
                 i = k - 1;
             } else {
                 for (int j = 1; j < width; ++j) {
-                    ret.get(j - 1).addAndroidString(new AndroidString.AndroidCommonString(id, data.get(i)[j]));
+                    ret.get(j - 1).addAndroidString(new AndroidResource.AndroidCommonString(id, data.get(i)[j]));
                 }
             }
             i++;

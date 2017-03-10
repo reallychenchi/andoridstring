@@ -6,17 +6,17 @@ import java.util.List;
 /**
  * Created by chenchi on 16-8-30.
  */
-public abstract class AndroidString {
+public abstract class AndroidResource {
     public final String id;
 
-    public AndroidString(String id){
+    public AndroidResource(String id){
         this.id = id;
     }
 
     @Override
     public boolean equals(Object o){
-        if (o instanceof AndroidString) {
-            return id.equals(((AndroidString)o).id);
+        if (o instanceof AndroidResource) {
+            return id.equals(((AndroidResource)o).id);
         }else{
             return false;
         }
@@ -31,7 +31,7 @@ public abstract class AndroidString {
         return id.hashCode();
     }
 
-    public static class AndroidCommonString extends AndroidString{
+    public static class AndroidCommonString extends AndroidResource {
         public final String content;
         final String FMT = "\t<string name=\"%1$s\">%2$s</string>\n";
 
@@ -58,7 +58,7 @@ public abstract class AndroidString {
         }
     }
 
-    public static class AndroidArrayString extends AndroidString{
+    public static class AndroidArrayString extends AndroidResource {
         public final List<String> content;
         final String ARRAY_FMT = "\t<string-array name=\"%s\">\n";
         final String ITEM_FMT = "\t\t<item>%s</item>\n";

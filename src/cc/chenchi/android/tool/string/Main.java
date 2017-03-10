@@ -1,8 +1,11 @@
 package cc.chenchi.android.tool.string;
 
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 import org.xml.sax.SAXException;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -15,21 +18,19 @@ public class Main {
     public static void main(String[] args) {
         //merge();
         //createIncrement();
-        createNewAll();
+        createNewAll("res", "datamap.csv");
         //createNewPart();
     }
 
 
-
-    private static void createNewAll() {
+    private static void createNewAll(String fn, String dest) {
         try {
-            String fn = "res";
             List<AndroidStringFile> existsAsf = AndroidStringFile.parseFromFolder(new File(fn));
             List<String> fileName = new ArrayList<>();
             Map<String, List<String>> data = new HashMap<String, List<String>>();
             AndroidStringFile asf0 = existsAsf.get(0);
             List<String> ids = new ArrayList<>();
-            for (AndroidString as : asf0.androidString) {
+            for (AndroidResource as : asf0.androidString) {
                 for (String id : as.getIds()) {
                     if (!ids.contains(id)) {
                         ids.add(id);
@@ -49,7 +50,7 @@ public class Main {
                 }
                 countryNames.add(destFileName);
 
-                for (AndroidString as : asf.androidString) {
+                for (AndroidResource as : asf.androidString) {
                     String tabString = as.toTabString();
                     String[] tabstrarr = tabString.split("\n");
                     for (String singLine : tabstrarr) {
@@ -69,56 +70,32 @@ public class Main {
                     }
                 }
             }
-
-            FileOutputStream fostream = new FileOutputStream("datamap.txt");
-            fostream.write("TBL\t".getBytes());
+            FileOutputStream fostream = new FileOutputStream(dest);
+            //Write the CSV BOM
+            fostream.write('\ufeef'); // emits 0xef
+            fostream.write('\ufebb'); // emits 0xbb
+            fostream.write('\ufebf'); // emits 0xbf
+            OutputStreamWriter fileWriter = new OutputStreamWriter(fostream, StandardCharsets.UTF_8);
+            CSVPrinter printer = new CSVPrinter(fileWriter, CSVFormat.EXCEL);
+            //Country in the head
+            printer.print("\\");
             for (int i = 0; i < countryNames.size(); ++i) {
-                fostream.write(countryNames.get(i).getBytes());
-                fostream.write("\t".getBytes());
+                printer.print(countryNames.get(i));
             }
-            fostream.write("\n".getBytes());
+            printer.println();
+
             for (int i = 0; i < ids.size(); ++i) {
-                boolean need = true;
-                StringBuilder sbd = new StringBuilder();
-                sbd.append(ids.get(i));
-                sbd.append("\t");
+                printer.print(ids.get(i));
                 for (int j = 0; j < dataMap[i].length; ++j) {
                     if (null == dataMap[i][j]) {
                         dataMap[i][j] = "#####";
-                        need = true;
                         System.out.println("EmptyTranslation:\t" + ids.get(i) + ", " + countryNames.get(j));
                     }
-                    sbd.append(dataMap[i][j]);
-                    sbd.append("\t");
+                    printer.print(dataMap[i][j]);
                 }
-                sbd.append("\n");
-                if (need) {
-                    fostream.write(sbd.toString().getBytes());
-                }
+                printer.println();
             }
-            fostream.close();
-            /*
-            AndroidStringFile asfExist = existsAsf.get(0);
-            AndroidStringFile asfZh = existsAsf.get(1);
-            List<AndroidString> ids = new ArrayList<>();
-            for (int i = 0; i < asfExist.androidString.size(); ++i) {
-                AndroidString asExists = asfExist.androidString.get(i);
-                if (asfZh.androidString.contains(asExists)) {
-                } else {
-                    int idx = asfExist.indexOf(asExists);
-                    if (idx == -1) {
-                        System.out.println(asExists.id);
-                    } else {
-                        ids.add(asfExist.androidString.get(idx));
-                    }
-                }
-            }
-            FileOutputStream fostream = new FileOutputStream("incrementAll.txt");
-            for (AndroidString as : ids) {
-                fostream.write(as.toTabString().getBytes());
-            }
-            fostream.close();
-            */
+            printer.close();
         } catch (IOException e) {
             e.printStackTrace();
         } catch (ParserConfigurationException e) {
@@ -134,9 +111,9 @@ public class Main {
             List<AndroidStringFile> existsAsf = AndroidStringFile.parseFromFolder(new File(fn));
             AndroidStringFile asfDefault = existsAsf.get(0);
             AndroidStringFile asfFr = existsAsf.get(1);
-            List<AndroidString> ids = new ArrayList<>();
+            List<AndroidResource> ids = new ArrayList<>();
             for (int i = 0; i < asfDefault.androidString.size(); ++i) {
-                AndroidString asExists = asfDefault.androidString.get(i);
+                AndroidResource asExists = asfDefault.androidString.get(i);
                 int idx = asfFr.indexOf(asExists);
                 if (idx == -1) {
                     ids.add(asExists);
@@ -145,7 +122,7 @@ public class Main {
                 }
             }
             FileOutputStream fostream = new FileOutputStream("incrementAll.txt");
-            for (AndroidString as : ids) {
+            for (AndroidResource as : ids) {
                 fostream.write(as.toTabString().getBytes());
             }
             fostream.close();
@@ -167,14 +144,14 @@ public class Main {
             AndroidStringFile asfBase = increatmentBaseAsf.get(0);
             AndroidStringFile asfExist = existsAsf.get(0);
             //Any string in asfExists not in asfBase should be output
-            List<AndroidString> ids = new ArrayList<>();
-            for (AndroidString asExists : asfExist.androidString) {
+            List<AndroidResource> ids = new ArrayList<>();
+            for (AndroidResource asExists : asfExist.androidString) {
                 if (!asfBase.androidString.contains(asExists)) {
                     ids.add(asExists);
                 }
             }
             FileOutputStream fostream = new FileOutputStream("increment.txt");
-            for (AndroidString as : ids) {
+            for (AndroidResource as : ids) {
                 fostream.write(as.toTabString().getBytes());
             }
             fostream.close();

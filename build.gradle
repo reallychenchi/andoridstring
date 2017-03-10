@@ -14,6 +14,10 @@ sourceSets {
     }*/
 }
 
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+}
+
 //Identifies project’sversion through a number scheme
 version = 0.1
 
