@@ -129,37 +129,14 @@ public class AndroidStringFile {
         //parse an XML file into a DOM tree
         document = builder.parse(fn);
         Element root = document.getDocumentElement();
-        NodeList nodes = root.getElementsByTagName("string-array");
-        Map<String, List<String>> arrayMap = new HashMap<String, List<String>>();
+        NodeList nodes = root.getChildNodes();
         for (int i = 0; i < nodes.getLength(); ++i) {
-            Node node = nodes.item(i);
-            String id = node.getAttributes().getNamedItem("name").getTextContent();
-            List<String> array = arrayMap.get(id);
-            if (null == array) {
-                array = new ArrayList<>();
+            AndroidResource as = AndroidResource.createResourceByNode(nodes.item(i));
+            if (null != as){
+                ret.addAndroidString(as);
             }
-            NodeList arrayList = node.getChildNodes();
-            for(int j = 0; j < arrayList.getLength(); ++j){
-                Node n = arrayList.item(j);
-                String text = n.getTextContent();
-                if (text.trim().length() == 0) continue;
-                array.add(n.getTextContent());
-            }
-            arrayMap.put(id, array);
         }
 
-        nodes = root.getElementsByTagName("string");
-        for (int i = 0; i < nodes.getLength(); ++i) {
-            Node node = nodes.item(i);
-            String id = node.getAttributes().getNamedItem("name").getTextContent();
-            String str = node.getTextContent();
-            ret.addAndroidString(new AndroidResource.AndroidCommonString(id, str));
-        }
-        for (String key : arrayMap.keySet()) {
-            List<String> strings = arrayMap.get(key);
-            AndroidResource as = new AndroidResource.AndroidArrayString(key, strings);
-            ret.addAndroidString(as);
-        }
         if (ret.androidString.size() > 0)
             return ret;
         else

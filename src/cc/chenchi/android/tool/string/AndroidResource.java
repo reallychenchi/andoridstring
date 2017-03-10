@@ -3,14 +3,27 @@ package cc.chenchi.android.tool.string;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
 /**
  * Created by chenchi on 16-8-30.
  */
 public abstract class AndroidResource {
     public final String id;
+    public final Node mXmlNode;
 
     public AndroidResource(String id){
         this.id = id;
+        mXmlNode = null;
+    }
+
+    public AndroidResource(Node node){
+        mXmlNode = node;
+        id = mXmlNode.getAttributes().getNamedItem("name").getTextContent();
     }
 
     @Override
@@ -31,11 +44,45 @@ public abstract class AndroidResource {
         return id.hashCode();
     }
 
+    public static AndroidResource createResourceByNode(Node node){
+        if (node.getAttributes() == null)   return null;
+        if (node.getNodeName().equals("string")){
+            return new AndroidCommonString(node);
+        }else if (node.getNodeName().equals("string-array")){
+            return new AndroidArrayString(node);
+        }else{
+            return new OtherResource(node);
+        }
+    }
+
+    public static class OtherResource extends AndroidResource{
+        public OtherResource(Node node){
+            super(node);
+        }
+
+        @Override
+        public List<String> getIds() {
+            List<String> ret = new ArrayList<>();
+            ret.add(id);
+            return ret;
+        }
+
+        @Override
+        public String toTabString() {
+            return null;
+        }
+    }
+
     public static class AndroidCommonString extends AndroidResource {
         public final String content;
         final String FMT = "\t<string name=\"%1$s\">%2$s</string>\n";
 
-        public AndroidCommonString(String id, String content) {
+        public AndroidCommonString(Node node) {
+            super(node);
+            this.content = node.getTextContent();
+        }
+
+        public AndroidCommonString(String id, String content){
             super(id);
             this.content = content;
         }
@@ -64,9 +111,22 @@ public abstract class AndroidResource {
         final String ITEM_FMT = "\t\t<item>%s</item>\n";
         final String ARRAY_END = "\t</string-array>\n";
 
-        public AndroidArrayString(String id, List<String> content) {
+        public AndroidArrayString(String id, List<String> array){
             super(id);
-            this.content = content;
+            content = array;
+        }
+
+        public AndroidArrayString(Node node) {
+            super(node);
+            List<String> array = new ArrayList<>();
+            NodeList arrayList = node.getChildNodes();
+            for(int j = 0; j < arrayList.getLength(); ++j){
+                Node n = arrayList.item(j);
+                String text = n.getTextContent();
+                if (text.trim().length() == 0) continue;
+                array.add(n.getTextContent());
+            }
+            content = array;
         }
 
         @Override
