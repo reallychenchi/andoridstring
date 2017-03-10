@@ -92,21 +92,21 @@ public class AndroidStringFile {
 
     /**
      * 从res目录下面的xml文件解析AndroidStringFile出来
-     * @param fn
+     * @param folder
      * @return
      * @throws IOException
      * @throws ParserConfigurationException
      * @throws SAXException
      */
-    public static List<AndroidStringFile> parseFromFolder(File fn) throws IOException, ParserConfigurationException, SAXException {
+    public static List<AndroidStringFile> parseFromFolder(File folder, String fileName) throws IOException, ParserConfigurationException, SAXException {
         List<AndroidStringFile> ret = new ArrayList<>();
-        assert fn.isDirectory();
-        File[] files = fn.listFiles();
+        assert folder.isDirectory();
+        File[] files = folder.listFiles();
         for (File f : files) {
             if (f.isDirectory()) {
-                ret.addAll(parseFromFolder(f));
+                ret.addAll(parseFromFolder(f, fileName));
             //} else if (f.getName().endsWith(".xml")) {
-            } else if (f.getName().equals("strings.xml")) {
+            } else if (f.getName().equals(fileName)) {
                 AndroidStringFile asf = parseFromFile(f);
                 if (asf != null) {
                     ret.add(asf);

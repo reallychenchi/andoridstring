@@ -18,17 +18,17 @@ public class Main {
     public static void main(String[] args) {
         //merge();
         //createIncrement();
-        createNewAll("res", "datamap.csv");
+        createNewAll("res", "strings.xml");
         //createNewPart();
     }
 
 
-    private static void createNewAll(String fn, String dest) {
+    private static void createNewAll(String fn, String targetFile) {
         try {
-            List<AndroidStringFile> existsAsf = AndroidStringFile.parseFromFolder(new File(fn));
+            List<AndroidStringFile> existsAsf = AndroidStringFile.parseFromFolder(new File(fn), targetFile);
             List<String> fileName = new ArrayList<>();
             Map<String, List<String>> data = new HashMap<String, List<String>>();
-            AndroidStringFile asf0 = existsAsf.get(0);
+            AndroidStringFile asf0 = existsAsf.get(0);//string in value as the default
             List<String> ids = new ArrayList<>();
             for (AndroidResource as : asf0.androidString) {
                 for (String id : as.getIds()) {
@@ -70,6 +70,7 @@ public class Main {
                     }
                 }
             }
+            String dest = targetFile + ".csv";
             FileOutputStream fostream = new FileOutputStream(dest);
             //Write the CSV BOM
             fostream.write('\ufeef'); // emits 0xef
@@ -108,7 +109,7 @@ public class Main {
     private static void createNewPart() {
         try {
             String fn = "res";
-            List<AndroidStringFile> existsAsf = AndroidStringFile.parseFromFolder(new File(fn));
+            List<AndroidStringFile> existsAsf = AndroidStringFile.parseFromFolder(new File(fn), "strings.xml");
             AndroidStringFile asfDefault = existsAsf.get(0);
             AndroidStringFile asfFr = existsAsf.get(1);
             List<AndroidResource> ids = new ArrayList<>();
@@ -140,7 +141,7 @@ public class Main {
             String fn = "trans.txt";//Increatment base
             List<AndroidStringFile> increatmentBaseAsf = AndroidStringFile.parseFromString(new File(fn));
             fn = "res";
-            List<AndroidStringFile> existsAsf = AndroidStringFile.parseFromFolder(new File(fn));
+            List<AndroidStringFile> existsAsf = AndroidStringFile.parseFromFolder(new File(fn), "strings.xml");
             AndroidStringFile asfBase = increatmentBaseAsf.get(0);
             AndroidStringFile asfExist = existsAsf.get(0);
             //Any string in asfExists not in asfBase should be output
@@ -170,7 +171,7 @@ public class Main {
             String fn = "received_history_toast_no_app_to_open.txt";
             List<AndroidStringFile> newfiles = AndroidStringFile.parseFromString(new File(fn));
             fn = "res";
-            List<AndroidStringFile> exists = AndroidStringFile.parseFromFolder(new File(fn));
+            List<AndroidStringFile> exists = AndroidStringFile.parseFromFolder(new File(fn), "strings.xml");
             List<AndroidStringFile> merge = new ArrayList<>();
             for (AndroidStringFile es : exists) {
                 for (AndroidStringFile nf : newfiles) {
