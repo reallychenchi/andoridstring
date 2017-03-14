@@ -4,7 +4,10 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.xml.sax.SAXException;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -51,12 +54,10 @@ public class Main {
                 countryNames.add(destFileName);
 
                 for (AndroidResource as : asf.androidString) {
-                    String tabString = as.toTabString();
-                    String[] tabstrarr = tabString.split("\n");
-                    for (String singLine : tabstrarr) {
-                        String[] splitStr = singLine.split("\t");
+                    String[][] tabString = as.toTabString();
+                    for (String[] splitStr : tabString) {
                         if (splitStr.length != 2) {
-                            System.out.println("Wrong line:\t" + singLine);
+                            System.out.println("Wrong line:\t" + as.toString());
                             continue;
                         }
                         String id = splitStr[0].trim();
@@ -106,6 +107,7 @@ public class Main {
         }
     }
 
+    /*
     private static void createNewPart() {
         try {
             String fn = "res";
@@ -164,7 +166,7 @@ public class Main {
             e.printStackTrace();
         }
 
-    }
+    }*/
 
     private static void merge() {
         try {

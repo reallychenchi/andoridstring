@@ -37,7 +37,7 @@ public abstract class AndroidResource {
 
     public abstract List<String> getIds();
 
-    public abstract String toTabString();
+    public abstract String[][] toTabString();
 
     @Override
     public int hashCode(){
@@ -68,7 +68,7 @@ public abstract class AndroidResource {
         }
 
         @Override
-        public String toTabString() {
+        public String[][] toTabString() {
             return null;
         }
     }
@@ -100,8 +100,11 @@ public abstract class AndroidResource {
         }
 
         @Override
-        public String toTabString() {
-            return id + "\t" + content + "\n";
+        public String[][] toTabString() {
+            String[][] ret = new String[1][2];
+            ret[0][0] = id;
+            ret[0][1] = content;
+            return ret;
         }
     }
 
@@ -140,11 +143,12 @@ public abstract class AndroidResource {
         }
 
         @Override
-        public String toTabString() {
-            String ret = "";
+        public String[][] toTabString() {
+            String[][] ret = new String[content.size()][];
             for(int i = 0; i < content.size(); ++i){
-                String line = id + "_" + i + "\t" + content.get(i) + "\n";
-                ret = ret + line;
+                ret[i] = new String[2];
+                ret[i][0] = id + "_" + i;
+                ret[i][1] = content.get(i);
             }
             return ret;
         }
