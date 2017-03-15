@@ -57,7 +57,7 @@ public class Main {
                     String[][] tabString = as.toTabString();
                     for (String[] splitStr : tabString) {
                         if (splitStr.length != 2) {
-                            System.out.println("Wrong line:\t" + as.toString());
+                            System.out.println("Wrong line:\t" + asf.fileName + ", " + as.id + ", " + splitStr.length);
                             continue;
                         }
                         String id = splitStr[0].trim();
@@ -91,7 +91,6 @@ public class Main {
                 for (int j = 0; j < dataMap[i].length; ++j) {
                     if (null == dataMap[i][j]) {
                         dataMap[i][j] = "#####";
-                        System.out.println("EmptyTranslation:\t" + ids.get(i) + ", " + countryNames.get(j));
                     }
                     printer.print(dataMap[i][j]);
                 }
